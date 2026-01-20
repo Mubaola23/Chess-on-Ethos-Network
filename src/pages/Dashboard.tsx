@@ -43,7 +43,7 @@ export function Dashboard() {
   if (!ethosWallet) return <div className="p-8 text-center">Please connect your wallet</div>
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <div className="w-full p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-extrabold mb-2">Welcome!</h1>

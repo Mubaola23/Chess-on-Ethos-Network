@@ -73,7 +73,7 @@ export function InvitationsPage() {
   const currentList = activeTab === 'received' ? invitations.received : invitations.sent
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full p-6">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Invitations</h1>
         <div className="flex bg-[#262421] p-1 rounded-lg">

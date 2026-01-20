@@ -120,7 +120,11 @@ export function EthosProfileCard({ user }: { user: EthosUser }) {
 
 export function LoginButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type='button' onClick={onClick}>
+    <button
+      type='button'
+      onClick={onClick}
+      className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-blue-500/25 active:scale-95"
+    >
       Log in
     </button>
   )
@@ -128,7 +132,11 @@ export function LoginButton({ onClick }: { onClick: () => void }) {
 
 export function LogoutButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type='button' onClick={onClick}>
+    <button
+      type='button'
+      onClick={onClick}
+      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-medium rounded-lg transition-all border border-gray-700"
+    >
       Logout
     </button>
   )
@@ -187,12 +195,12 @@ export function LoadingMessage({ message = 'Loading...' }: { message?: string })
 
 export function TopLinks() {
   return (
-    <div className='top-links'>
+    <div className='absolute top-4 right-4 flex items-center gap-3'>
       <a
         href='https://developers.ethos.network/'
         target='_blank'
         rel='noopener noreferrer'
-        className='top-link'
+        className='flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-700/50 transition-all'
       >
         <svg
           xmlns='http://www.w3.org/2000/svg'
@@ -213,7 +221,7 @@ export function TopLinks() {
         href='https://github.com/videvian/log-in-with-ethos'
         target='_blank'
         rel='noopener noreferrer'
-        className='top-link'
+        className='flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white text-sm font-medium rounded-lg border border-gray-700/50 transition-all'
       >
         <svg
           xmlns='http://www.w3.org/2000/svg'

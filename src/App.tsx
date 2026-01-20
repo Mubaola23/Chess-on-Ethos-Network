@@ -44,12 +44,14 @@ function NotAuthenticated() {
   return (
     <>
       <TopLinks />
-      <div className='container'>
+      <div className='landing-container'>
         <EthosLogo size={160} />
 
         <header className='app-header'>
-          <h1>Ethos Chess</h1>
-          <p>A fully functional on-chain chess application on the Ethos blockchain.</p>
+          <h1 className="text-5xl font-extrabold mb-4">Ethos Chess</h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+            A fully functional on-chain chess application on the Ethos blockchain.
+          </p>
         </header>
 
         <LoginButton onClick={login} />

@@ -175,7 +175,7 @@ export function GamePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="w-full p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-4">
         <div className="flex items-center justify-between bg-[#262421] p-3 rounded-t-lg border-x border-t border-gray-800">
           <div className="flex items-center gap-3">
