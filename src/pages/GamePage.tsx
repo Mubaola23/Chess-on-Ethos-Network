@@ -31,7 +31,7 @@ export function GamePage() {
 
   const fetchGame = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/games/${gameId}`)
+      const response = await fetch(`/api/games/${gameId}`)
       if (!response.ok) throw new Error('Game not found')
       const data = await response.json()
       setGameData(data)
@@ -53,7 +53,7 @@ export function GamePage() {
   useEffect(() => {
     fetchGame()
 
-    const newSocket = io('http://localhost:3001')
+    const newSocket = io('')
     setSocket(newSocket)
 
     newSocket.emit('joinGame', gameId)
@@ -138,7 +138,7 @@ export function GamePage() {
   const handleResign = async () => {
     if (!window.confirm('Are you sure you want to resign?')) return
     try {
-      await fetch(`http://localhost:3001/api/games/${gameId}/resign`, {
+      await fetch(`/api/games/${gameId}/resign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: ethosWallet })
@@ -151,7 +151,7 @@ export function GamePage() {
   const handleOfferDraw = async () => {
     if (!window.confirm('Offer a draw?')) return
     try {
-      await fetch(`http://localhost:3001/api/games/${gameId}/draw`, {
+      await fetch(`/api/games/${gameId}/draw`, {
         method: 'POST'
       })
     } catch (_err) {

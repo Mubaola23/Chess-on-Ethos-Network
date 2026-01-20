@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import db from './db.js';
+import crypto from 'node:crypto';
 
 const app = express();
 app.use(cors());

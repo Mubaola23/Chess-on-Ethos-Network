@@ -4,9 +4,8 @@ import { Plus, Play, History, Trophy, User } from 'lucide-react'
 import { InviteModal } from '../components/InviteModal'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import type { EthosUser } from '../components.tsx'
 
-export function Dashboard({ user }: { user: EthosUser }) {
+export function Dashboard() {
   const ethosWallet = useEthosWallet()
   const navigate = useNavigate()
   const [activeGames, setActiveGames] = useState([])
@@ -17,8 +16,8 @@ export function Dashboard({ user }: { user: EthosUser }) {
     if (!ethosWallet) return
     try {
       const [activeRes, completedRes] = await Promise.all([
-        fetch(`http://localhost:3001/api/games/active/${ethosWallet}`),
-        fetch(`http://localhost:3001/api/games/completed/${ethosWallet}`)
+        fetch(`/api/games/active/${ethosWallet}`),
+        fetch(`/api/games/completed/${ethosWallet}`)
       ])
 
       const activeData = await activeRes.json()
@@ -47,7 +46,7 @@ export function Dashboard({ user }: { user: EthosUser }) {
     <div className="w-full p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-extrabold mb-2">Welcome back {user.displayName} !</h1>
+          <h1 className="text-4xl font-extrabold mb-2">Welcome!</h1>
           <p className="text-gray-400 font-mono text-sm">{ethosWallet}</p>
         </div>
         <button

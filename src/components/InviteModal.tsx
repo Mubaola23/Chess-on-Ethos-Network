@@ -17,7 +17,8 @@ export function InviteModal({ isOpen, onClose, onInvite, currentAddress }: {
   if (!isOpen) return null
 
   const validateAddress = (addr: string) => {
-    return /^0x[a-fA-F0-9]{40}$/.test(addr) || addr.includes('.ethos');
+    // Ethos/Sui addresses are 32 bytes (64 hex characters)
+    return /^0x[a-fA-F0-9]{64}$/.test(addr) || addr.includes('.ethos');
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +36,7 @@ export function InviteModal({ isOpen, onClose, onInvite, currentAddress }: {
 
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:3001/api/invitations', {
+      const response = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

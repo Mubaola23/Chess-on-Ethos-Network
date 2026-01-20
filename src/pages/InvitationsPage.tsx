@@ -23,7 +23,7 @@ export function InvitationsPage() {
   const fetchInvitations = useCallback(async () => {
     if (!ethosWallet) return
     try {
-      const response = await fetch(`http://localhost:3001/api/invitations/${ethosWallet}`)
+      const response = await fetch(`/api/invitations/${ethosWallet}`)
       if (!response.ok) throw new Error('Failed to fetch invitations')
       const data = await response.json()
       setInvitations(data)
@@ -42,7 +42,7 @@ export function InvitationsPage() {
 
   const handleRespond = async (id: string, status: 'accepted' | 'declined') => {
     try {
-      const response = await fetch('http://localhost:3001/api/invitations/respond', {
+      const response = await fetch('/api/invitations/respond', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status })
