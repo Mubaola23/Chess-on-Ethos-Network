@@ -1,0 +1,10 @@
+{
+  "id": "evt-1768906508894-6d8838c7",
+  "trigger": "feature_error",
+  "timestamp": "2026-01-20T10:55:08.894Z",
+  "projectPath": "/Users/mac/Documents/log-in-with-ethos",
+  "projectName": "log-in-with-ethos",
+  "featureId": "feature-1768906482621-m25cfojaz",
+  "error": "opencode CLI not found. opencode is not installed. Check the documentation for installation instructions.",
+  "errorType": "execution"
+}

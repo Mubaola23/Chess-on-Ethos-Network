@@ -1,0 +1,10 @@
+{
+  "id": "evt-1768906493955-879a7e88",
+  "trigger": "feature_error",
+  "timestamp": "2026-01-20T10:54:53.955Z",
+  "projectPath": "/Users/mac/Documents/log-in-with-ethos",
+  "projectName": "log-in-with-ethos",
+  "featureId": "feature-1768906482621-m25cfojaz",
+  "error": "Authentication failed: Invalid or expired API key. Please check your ANTHROPIC_API_KEY, or run 'claude login' to re-authenticate.",
+  "errorType": "authentication"
+}
