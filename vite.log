@@ -1,0 +1,15 @@
+
+> chess-on-ethos@0.1.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 339 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+11:36:30 AM [vite] hmr update /src/providers/EthosProvider.tsx, /src/index.css
+11:36:30 AM [vite] hmr update /src/providers/EthosProvider.tsx, /src/index.css
+11:40:15 AM [vite] hmr update /src/providers/EthosProvider.tsx, /src/index.css
+11:42:18 AM [vite] hmr update /src/providers/EthosProvider.tsx, /src/index.css
+11:42:42 AM [vite] hmr update /src/providers/EthosProvider.tsx, /src/index.css
+11:43:46 AM [vite] hmr update /src/providers/EthosProvider.tsx, /src/index.css
