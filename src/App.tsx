@@ -8,7 +8,6 @@ import {
 } from './components.tsx'
 import { Layout } from './components/Layout.tsx'
 import { Dashboard } from './pages/Dashboard.tsx'
-import { InvitationsPage } from './pages/InvitationsPage.tsx'
 import { GamePage } from './pages/GamePage.tsx'
 
 export function App() {
@@ -24,10 +23,6 @@ export function App() {
         <Route
           path="/"
           element={!authenticated ? <NotAuthenticated /> : <Dashboard />}
-        />
-        <Route
-          path="/invitations"
-          element={authenticated ? <InvitationsPage /> : <Navigate to="/" />}
         />
         <Route
           path="/game/:gameId"

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useEthosWallet } from '../hooks'
-import { Plus, Play, History, Trophy, User } from 'lucide-react'
-import { InviteModal } from '../components/InviteModal'
+import { Bot, Play, History, Trophy, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
@@ -10,7 +9,7 @@ export function Dashboard() {
   const navigate = useNavigate()
   const [activeGames, setActiveGames] = useState([])
   const [completedGames, setCompletedGames] = useState([])
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   const fetchData = useCallback(async () => {
     if (!ethosWallet) return
@@ -40,6 +39,24 @@ export function Dashboard() {
     }
   }, [fetchData])
 
+  const startAIGame = async () => {
+    if (isCreating) return
+    setIsCreating(true)
+    try {
+      const res = await fetch('/api/games/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: ethosWallet, level: 1 })
+      })
+      const data = await res.json()
+      navigate(`/game/${data.id}`)
+    } catch (err) {
+      toast.error('Failed to start AI game')
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
   if (!ethosWallet) return <div className="p-8 text-center">Please connect your wallet</div>
 
   return (
@@ -50,11 +67,12 @@ export function Dashboard() {
           <p className="text-gray-400 font-mono text-sm">{ethosWallet}</p>
         </div>
         <button
-          onClick={() => setIsInviteModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition-all shadow-lg hover:shadow-blue-500/20"
+          onClick={startAIGame}
+          disabled={isCreating}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition-all shadow-lg hover:shadow-blue-500/20 disabled:opacity-50"
         >
-          <Plus size={20} />
-          New Game
+          <Bot size={20} />
+          {isCreating ? 'Creating...' : 'Play Computer'}
         </button>
       </div>
 
@@ -128,12 +146,6 @@ export function Dashboard() {
         </section>
       </div>
 
-      <InviteModal
-        isOpen={isInviteModalOpen}
-        onClose={() => setIsInviteModalOpen(false)}
-        onInvite={fetchData}
-        currentAddress={ethosWallet}
-      />
     </div>
   )
 }

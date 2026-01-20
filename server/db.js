@@ -9,15 +9,6 @@ const db = new Database(dbPath);
 
 // Initialize tables
 db.exec(`
-  CREATE TABLE IF NOT EXISTS invitations (
-    id TEXT PRIMARY KEY,
-    inviter TEXT NOT NULL,
-    invitee TEXT NOT NULL,
-    timeControl TEXT,
-    status TEXT DEFAULT 'pending',
-    createdAt INTEGER NOT NULL
-  );
-
   CREATE TABLE IF NOT EXISTS games (
     id TEXT PRIMARY KEY,
     white TEXT NOT NULL,

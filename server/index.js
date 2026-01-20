@@ -1,6 +1,5 @@
 import express from 'express';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
 import cors from 'cors';
 import db from './db.js';
 import crypto from 'node:crypto';
@@ -10,71 +9,24 @@ app.use(cors());
 app.use(express.json());
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
-});
 
 const generateId = () => crypto.randomUUID();
 
 // API Endpoints
 
-// Get invitations for an address
-app.get('/api/invitations/:address', (req, res) => {
-  const { address } = req.params;
-  const received = db.prepare("SELECT * FROM invitations WHERE invitee = ? AND status = 'pending'").all(address);
-  const sent = db.prepare("SELECT * FROM invitations WHERE inviter = ? AND status = 'pending'").all(address);
-  res.json({ received, sent });
-});
+// Create AI Game
+app.post('/api/games/ai', (req, res) => {
+  const { address, level } = req.body;
+  const gameId = generateId();
 
-// Send invitation
-app.post('/api/invitations', (req, res) => {
-  const { inviter, invitee, timeControl, color, rated } = req.body;
-  if (inviter === invitee) return res.status(400).json({ error: 'Cannot invite yourself' });
+  const white = address;
+  const black = 'AI_LEVEL_' + (level || 1);
+  const timeControl = JSON.stringify({ initial: 600, increment: 0 });
 
-  const id = generateId();
-  db.prepare('INSERT INTO invitations (id, inviter, invitee, timeControl, createdAt) VALUES (?, ?, ?, ?, ?)')
-    .run(id, inviter, invitee, JSON.stringify({ ...timeControl, color, rated }), Date.now());
+  db.prepare('INSERT INTO games (id, white, black, fen, createdAt, lastMoveAt, timeControl) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(gameId, white, black, 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', Date.now(), Date.now(), timeControl);
 
-  res.json({ id, inviter, invitee, timeControl, color, rated, status: 'pending' });
-});
-
-// Respond to invitation
-app.post('/api/invitations/respond', (req, res) => {
-  const { id, status } = req.body; // status: 'accepted' or 'declined'
-
-  const invite = db.prepare('SELECT * FROM invitations WHERE id = ?').get(id);
-  if (!invite) return res.status(404).json({ error: 'Invitation not found' });
-
-  db.prepare('UPDATE invitations SET status = ? WHERE id = ?').run(status, id);
-
-  if (status === 'accepted') {
-    const gameId = generateId();
-    const settings = JSON.parse(invite.timeControl);
-
-    // Determine colors
-    let white, black;
-    if (settings.color === 'white') {
-      white = invite.inviter;
-      black = invite.invitee;
-    } else if (settings.color === 'black') {
-      white = invite.invitee;
-      black = invite.inviter;
-    } else {
-      const isInviterWhite = Math.random() > 0.5;
-      white = isInviterWhite ? invite.inviter : invite.invitee;
-      black = isInviterWhite ? invite.invitee : invite.inviter;
-    }
-
-    db.prepare('INSERT INTO games (id, white, black, fen, createdAt, lastMoveAt, timeControl) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .run(gameId, white, black, 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', Date.now(), Date.now(), invite.timeControl);
-
-    return res.json({ gameId, status: 'accepted' });
-  }
-
-  res.json({ status });
+  res.json({ id: gameId });
 });
 
 // Get active games
@@ -111,7 +63,6 @@ app.post('/api/games/:id/resign', (req, res) => {
   const winner = address === game.white ? game.black : game.white;
   db.prepare('UPDATE games SET status = "resigned", winner = ? WHERE id = ?').run(winner, id);
 
-  io.to(id).emit('gameOver', { status: 'resigned', winner });
   res.json({ status: 'resigned', winner });
 });
 
@@ -119,33 +70,26 @@ app.post('/api/games/:id/resign', (req, res) => {
 app.post('/api/games/:id/draw', (req, res) => {
   const { id } = req.params;
   db.prepare('UPDATE games SET status = "draw" WHERE id = ?').run(id);
-  io.to(id).emit('gameOver', { status: 'draw' });
   res.json({ status: 'draw' });
 });
 
-// Timeout
+// Game Over (Checkmate or Timeout)
 app.post('/api/games/:id/timeout', (req, res) => {
   const { id } = req.params;
-  const { winner } = req.body;
-  db.prepare('UPDATE games SET status = "timeout", winner = ? WHERE id = ?').run(winner, id);
-  io.to(id).emit('gameOver', { status: 'timeout', winner });
-  res.json({ status: 'timeout', winner });
+  const { winner, status } = req.body;
+  db.prepare('UPDATE games SET status = ?, winner = ? WHERE id = ?').run(status || 'timeout', winner, id);
+  res.json({ status: status || 'timeout', winner });
 });
 
-// Socket.io for real-time moves
-io.on('connection', (socket) => {
-  socket.on('joinGame', (gameId) => {
-    socket.join(gameId);
-  });
+// Update game (for AI moves or local moves)
+app.post('/api/games/:id/move', (req, res) => {
+  const { id } = req.params;
+  const { move, fen } = req.body;
 
-  socket.on('move', (data) => {
-    const { gameId, move, fen } = data;
+  db.prepare('UPDATE games SET fen = ?, lastMoveAt = ? WHERE id = ?').run(fen, Date.now(), id);
+  db.prepare('INSERT INTO moves (gameId, move, fen, timestamp) VALUES (?, ?, ?, ?)').run(id, JSON.stringify(move), fen, Date.now());
 
-    db.prepare('UPDATE games SET fen = ?, lastMoveAt = ? WHERE id = ?').run(fen, Date.now(), gameId);
-    db.prepare('INSERT INTO moves (gameId, move, fen, timestamp) VALUES (?, ?, ?, ?)').run(gameId, move, fen, Date.now());
-
-    socket.to(gameId).emit('moveMade', data);
-  });
+  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3001;

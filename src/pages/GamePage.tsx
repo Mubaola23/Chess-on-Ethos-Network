@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
-import { io, Socket } from 'socket.io-client'
 import { useEthosWallet } from '../hooks'
 import toast from 'react-hot-toast'
 import { Flag, Handshake, User } from 'lucide-react'
+import { getBestMove } from '../utils/chessAI'
 
 interface GameData {
   id: string
@@ -24,7 +24,6 @@ export function GamePage() {
 
   const [game, setGame] = useState(new Chess())
   const [gameData, setGameData] = useState<GameData | null>(null)
-  const [socket, setSocket] = useState<Socket | null>(null)
   const [loading, setLoading] = useState(true)
   const [whiteTime, setWhiteTime] = useState(600)
   const [blackTime, setBlackTime] = useState(600)
@@ -94,26 +93,6 @@ export function GamePage() {
 
   useEffect(() => {
     fetchGame()
-
-    const newSocket = io('')
-    setSocket(newSocket)
-
-    newSocket.emit('joinGame', gameId)
-
-    newSocket.on('moveMade', (data: { move: any, fen: string }) => {
-      setGame(new Chess(data.fen))
-      calculateCapturedPieces(data.fen)
-      setViewIndex(-1)
-    })
-
-    newSocket.on('gameOver', (data: { status: string, winner: string | null }) => {
-      toast.success(`Game Over: ${data.status}${data.winner ? ` (Winner: ${data.winner})` : ''}`)
-      fetchGame()
-    })
-
-    return () => {
-      newSocket.disconnect()
-    }
   }, [gameId, fetchGame])
 
   useEffect(() => {
@@ -144,6 +123,18 @@ export function GamePage() {
     }
   }, [whiteTime, blackTime, gameData, gameId])
 
+  const updateGameOnServer = async (move: any, fen: string) => {
+    try {
+      await fetch(`/api/games/${gameId}/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ move, fen })
+      })
+    } catch (err) {
+      console.error('Failed to update game on server')
+    }
+  }
+
   function makeAMove(move: any) {
     try {
       const gameCopy = new Chess(game.fen())
@@ -152,11 +143,7 @@ export function GamePage() {
       if (result) {
         setGame(gameCopy)
         calculateCapturedPieces(gameCopy.fen())
-        socket?.emit('move', {
-          gameId,
-          move: result,
-          fen: gameCopy.fen()
-        })
+        updateGameOnServer(result, gameCopy.fen())
         return true
       }
     } catch (_e) {
@@ -166,14 +153,10 @@ export function GamePage() {
   }
 
   function onDrop(sourceSquare: string, targetSquare: string) {
-    if (!ethosWallet || !gameData) return false
+    if (!ethosWallet || !gameData || gameData.status !== 'active') return false
 
-    // Check if it's our turn
-    const turn = game.turn() === 'w' ? 'white' : 'black'
-    if (gameData[turn] !== ethosWallet) {
-      toast.error("It's not your turn!")
-      return false
-    }
+    // Player is always white
+    if (game.turn() !== 'w') return false
 
     const move = makeAMove({
       from: sourceSquare,
@@ -183,6 +166,39 @@ export function GamePage() {
 
     return move
   }
+
+  // AI Move Logic
+  useEffect(() => {
+    if (gameData?.status === 'active' && game.turn() === 'b' && !game.isGameOver()) {
+      const timer = setTimeout(() => {
+        const move = getBestMove(game)
+        if (move) {
+          makeAMove(move)
+        }
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [game, gameData])
+
+  // Game Over Detection
+  useEffect(() => {
+    if (game.isGameOver() && gameData?.status === 'active') {
+      let status = 'draw'
+      let winner = null
+      if (game.isCheckmate()) {
+        status = 'checkmate'
+        winner = game.turn() === 'w' ? gameData.black : gameData.white
+      }
+
+      fetch(`/api/games/${gameId}/timeout`, { // Re-using timeout endpoint for general game end
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ winner, status }) // Wait, timeout endpoint only takes winner? Let's fix that if needed.
+      })
+      toast.success(`Game Over: ${status}`)
+      fetchGame()
+    }
+  }, [game, gameData, gameId, fetchGame])
 
   const handleResign = async () => {
     if (!window.confirm('Are you sure you want to resign?')) return
