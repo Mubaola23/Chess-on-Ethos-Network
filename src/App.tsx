@@ -10,10 +10,11 @@ import { Layout } from './components/Layout.tsx'
 import { Dashboard } from './pages/Dashboard.tsx'
 import { InvitationsPage } from './pages/InvitationsPage.tsx'
 import { GamePage } from './pages/GamePage.tsx'
-
+import { useEthosUser, useEthosWallet } from './hooks.ts'
 export function App() {
   const { ready, authenticated } = usePrivy()
-
+    const ethosWallet = useEthosWallet()
+  const { ethosUser, loading } = useEthosUser(ethosWallet)
   if (!ready) {
     return <LoadingMessage />
   }
@@ -23,7 +24,7 @@ export function App() {
       <Routes>
         <Route
           path="/"
-          element={!authenticated ? <NotAuthenticated /> : <Dashboard />}
+          element={!authenticated || ethosUser==null? <NotAuthenticated /> : <Dashboard  user={ethosUser}/>}
         />
         <Route
           path="/invitations"

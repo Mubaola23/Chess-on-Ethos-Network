@@ -35,7 +35,7 @@ export function InviteModal({ isOpen, onClose, onInvite, currentAddress }: {
 
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:3001/api/invitations', {
+      const response = await fetch('http://127.0.0.1:5173//api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
