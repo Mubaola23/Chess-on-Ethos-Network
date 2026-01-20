@@ -2,31 +2,20 @@ import { useState, useEffect, useCallback } from 'react'
 import { useEthosWallet } from '../hooks'
 import { Bot, Play, History, Trophy, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { getGames, createLocalAIGame } from '../utils/storage'
 
 export function Dashboard() {
   const ethosWallet = useEthosWallet()
   const navigate = useNavigate()
-  const [activeGames, setActiveGames] = useState([])
-  const [completedGames, setCompletedGames] = useState([])
+  const [activeGames, setActiveGames] = useState<any[]>([])
+  const [completedGames, setCompletedGames] = useState<any[]>([])
   const [isCreating, setIsCreating] = useState(false)
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     if (!ethosWallet) return
-    try {
-      const [activeRes, completedRes] = await Promise.all([
-        fetch(`/api/games/active/${ethosWallet}`),
-        fetch(`/api/games/completed/${ethosWallet}`)
-      ])
-
-      const activeData = await activeRes.json()
-      const completedData = await completedRes.json()
-
-      setActiveGames(activeData)
-      setCompletedGames(completedData)
-    } catch (_err) {
-      toast.error('Failed to fetch games')
-    }
+    const allGames = getGames(ethosWallet)
+    setActiveGames(allGames.filter(g => g.status === 'active'))
+    setCompletedGames(allGames.filter(g => g.status !== 'active'))
   }, [ethosWallet])
 
   useEffect(() => {
@@ -39,22 +28,12 @@ export function Dashboard() {
     }
   }, [fetchData])
 
-  const startAIGame = async () => {
-    if (isCreating) return
+  const startAIGame = () => {
+    if (isCreating || !ethosWallet) return
     setIsCreating(true)
-    try {
-      const res = await fetch('/api/games/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: ethosWallet, level: 1 })
-      })
-      const data = await res.json()
-      navigate(`/game/${data.id}`)
-    } catch (err) {
-      toast.error('Failed to start AI game')
-    } finally {
-      setIsCreating(false)
-    }
+    const id = createLocalAIGame(ethosWallet, 1)
+    navigate(`/game/${id}`)
+    setIsCreating(false)
   }
 
   if (!ethosWallet) return <div className="p-8 text-center">Please connect your wallet</div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
@@ -6,16 +6,7 @@ import { useEthosWallet } from '../hooks'
 import toast from 'react-hot-toast'
 import { Flag, Handshake, User } from 'lucide-react'
 import { getBestMove } from '../utils/chessAI'
-
-interface GameData {
-  id: string
-  white: string
-  black: string
-  fen: string
-  status: string
-  winner: string | null
-  moves: any[]
-}
+import { getGameById, saveGame, type LocalGame } from '../utils/storage'
 
 export function GamePage() {
   const { gameId } = useParams<{ gameId: string }>()
@@ -23,7 +14,7 @@ export function GamePage() {
   const navigate = useNavigate()
 
   const [game, setGame] = useState(new Chess())
-  const [gameData, setGameData] = useState<GameData | null>(null)
+  const [gameData, setGameData] = useState<LocalGame | null>(null)
   const [loading, setLoading] = useState(true)
   const [whiteTime, setWhiteTime] = useState(600)
   const [blackTime, setBlackTime] = useState(600)
@@ -69,26 +60,24 @@ export function GamePage() {
     setMaterialAdvantage(advantage)
   }, [])
 
-  const fetchGame = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/games/${gameId}`)
-      if (!response.ok) throw new Error('Game not found')
-      const data = await response.json()
-      setGameData(data)
-      setGame(new Chess(data.fen))
-      calculateCapturedPieces(data.fen)
-
-      const settings = JSON.parse(data.timeControl || '{}')
-      if (settings.initial) {
-        setWhiteTime(settings.initial)
-        setBlackTime(settings.initial)
-      }
-    } catch (_err: any) {
-      toast.error('Failed to load game')
+  const fetchGame = useCallback(() => {
+    const data = getGameById(gameId!)
+    if (!data) {
+      toast.error('Game not found')
       navigate('/')
-    } finally {
-      setLoading(false)
+      return
     }
+
+    setGameData(data as any)
+    setGame(new Chess(data.fen))
+    calculateCapturedPieces(data.fen)
+
+    const settings = JSON.parse(data.timeControl || '{}')
+    if (settings.initial) {
+      setWhiteTime(settings.initial)
+      setBlackTime(settings.initial)
+    }
+    setLoading(false)
   }, [gameId, navigate])
 
   useEffect(() => {
@@ -115,24 +104,27 @@ export function GamePage() {
   useEffect(() => {
     if ((whiteTime === 0 || blackTime === 0) && gameData?.status === 'active') {
       const winner = whiteTime === 0 ? gameData.black : gameData.white
-      fetch(`/api/games/${gameId}/timeout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ winner })
-      }).catch(err => console.error('Failed to report timeout:', err))
+      const updated: LocalGame = {
+        ...gameData as any,
+        status: 'timeout',
+        winner
+      }
+      saveGame(updated)
+      setGameData(updated as any)
+      toast.error('Time out!')
     }
-  }, [whiteTime, blackTime, gameData, gameId])
+  }, [whiteTime, blackTime, gameData])
 
-  const updateGameOnServer = async (move: any, fen: string) => {
-    try {
-      await fetch(`/api/games/${gameId}/move`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ move, fen })
-      })
-    } catch (err) {
-      console.error('Failed to update game on server')
+  const updateGameLocally = (move: any, fen: string) => {
+    if (!gameData) return
+    const updated: LocalGame = {
+      ...gameData as any,
+      fen,
+      lastMoveAt: Date.now(),
+      moves: [...(gameData.moves || []), typeof move === 'string' ? move : move.san]
     }
+    saveGame(updated)
+    setGameData(updated as any)
   }
 
   function makeAMove(move: any) {
@@ -143,7 +135,7 @@ export function GamePage() {
       if (result) {
         setGame(gameCopy)
         calculateCapturedPieces(gameCopy.fen())
-        updateGameOnServer(result, gameCopy.fen())
+        updateGameLocally(result, gameCopy.fen())
         return true
       }
     } catch (_e) {
@@ -152,8 +144,8 @@ export function GamePage() {
     return false
   }
 
-  function onDrop(sourceSquare: string, targetSquare: string) {
-    if (!ethosWallet || !gameData || gameData.status !== 'active') return false
+  function onDrop({ sourceSquare, targetSquare }: { sourceSquare: string, targetSquare: string | null }) {
+    if (!ethosWallet || !gameData || gameData.status !== 'active' || !targetSquare) return false
 
     // Player is always white
     if (game.turn() !== 'w') return false
@@ -183,45 +175,46 @@ export function GamePage() {
   // Game Over Detection
   useEffect(() => {
     if (game.isGameOver() && gameData?.status === 'active') {
-      let status = 'draw'
+      let status: any = 'draw'
       let winner = null
       if (game.isCheckmate()) {
         status = 'checkmate'
         winner = game.turn() === 'w' ? gameData.black : gameData.white
       }
 
-      fetch(`/api/games/${gameId}/timeout`, { // Re-using timeout endpoint for general game end
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ winner, status }) // Wait, timeout endpoint only takes winner? Let's fix that if needed.
-      })
+      const updated: LocalGame = {
+        ...gameData as any,
+        status,
+        winner
+      }
+      saveGame(updated)
+      setGameData(updated as any)
       toast.success(`Game Over: ${status}`)
-      fetchGame()
     }
-  }, [game, gameData, gameId, fetchGame])
+  }, [game, gameData, gameId])
 
-  const handleResign = async () => {
-    if (!window.confirm('Are you sure you want to resign?')) return
-    try {
-      await fetch(`/api/games/${gameId}/resign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: ethosWallet })
-      })
-    } catch (_err) {
-      toast.error('Failed to resign')
+  const handleResign = () => {
+    if (!window.confirm('Are you sure you want to resign?') || !gameData) return
+    const winner = ethosWallet === gameData.white ? gameData.black : gameData.white
+    const updated: LocalGame = {
+      ...gameData as any,
+      status: 'resigned',
+      winner
     }
+    saveGame(updated)
+    setGameData(updated as any)
+    toast.success('Resigned')
   }
 
-  const handleOfferDraw = async () => {
-    if (!window.confirm('Offer a draw?')) return
-    try {
-      await fetch(`/api/games/${gameId}/draw`, {
-        method: 'POST'
-      })
-    } catch (_err) {
-      toast.error('Failed to offer draw')
+  const handleOfferDraw = () => {
+    if (!window.confirm('Offer a draw?') || !gameData) return
+    const updated: LocalGame = {
+      ...gameData as any,
+      status: 'draw'
     }
+    saveGame(updated)
+    setGameData(updated as any)
+    toast.success('Game drawn')
   }
 
   if (loading) return <div className="p-8 text-center text-gray-400">Loading game...</div>
@@ -272,12 +265,14 @@ export function GamePage() {
 
         <div className="aspect-square w-full max-w-[600px] mx-auto shadow-2xl">
           <Chessboard
-            position={viewIndex === -1 ? game.fen() : game.history({ verbose: true })[viewIndex].after}
-            onPieceDrop={onDrop}
-            boardOrientation={boardOrientation}
-            customDarkSquareStyle={{ backgroundColor: '#B58863' }}
-            customLightSquareStyle={{ backgroundColor: '#F0D9B5' }}
-            areArrowsAllowed={true}
+            options={{
+              position: viewIndex === -1 ? game.fen() : game.history({ verbose: true })[viewIndex].after,
+              onPieceDrop: onDrop,
+              boardOrientation: boardOrientation as any,
+              darkSquareStyle: { backgroundColor: '#B58863' },
+              lightSquareStyle: { backgroundColor: '#F0D9B5' },
+              allowDrawingArrows: true
+            }}
           />
         </div>
 
