@@ -84,4 +84,23 @@ deno task build
 - [Ethos Everywhere Wallet API](https://developers.ethos.network/api-documentation/api-v2/users#get-user-by-ethos-everywhere-wallet-address)
 - [Privy Docs](https://docs.privy.io/)
 - [Privy React Setup](https://docs.privy.io/basics/react/setup)
-# Chess-on-Ethos-Network
+
+## Chess on Ethos Network
+
+This application is a fully functional chess platform built on the Ethos Network.
+
+### Features
+- **Ethos Authentication**: Sign in using your Ethos profile.
+- **Invitation System**: Invite other players by their Ethos address.
+- **Real-time Gameplay**: Play chess moves in real-time with automatic board syncing.
+- **Game Management**: Track active and completed games on your dashboard.
+- **Rules & Logic**: Complete chess rules implemented with `chess.js`, including special moves.
+- **Responsive UI**: Built with React, Tailwind CSS, and `react-chessboard`.
+
+### Backend
+The application uses an Express server with SQLite (`better-sqlite3`) for persistent storage of games and invitations. Real-time updates are handled via Socket.io.
+
+### Running the App
+1. Install dependencies: `npm install`
+2. Start the backend: `npm run dev:server`
+3. Start the frontend: `npm run dev`

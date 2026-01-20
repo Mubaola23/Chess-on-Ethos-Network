@@ -1,14 +1,15 @@
 import { usePrivy } from '@privy-io/react-auth'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import {
   EthosLogo,
-  EthosProfileCard,
   LoadingMessage,
   LoginButton,
-  LogoutButton,
   TopLinks,
-  WalletAddress,
 } from './components.tsx'
-import { useEthosUser, useEthosWallet } from './hooks.ts'
+import { Layout } from './components/Layout.tsx'
+import { Dashboard } from './pages/Dashboard.tsx'
+import { InvitationsPage } from './pages/InvitationsPage.tsx'
+import { GamePage } from './pages/GamePage.tsx'
 
 export function App() {
   const { ready, authenticated } = usePrivy()
@@ -18,46 +19,41 @@ export function App() {
   }
 
   return (
-    <>
-      <TopLinks />
-      <div className='container'>
-        <EthosLogo size={160} />
-
-        <header className='app-header'>
-          <h1>Log in with Ethos</h1>
-          <p>Example app showing how to integrate Ethos Network authentication using Privy.</p>
-        </header>
-
-        {!authenticated ? <NotAuthenticated /> : <Authenticated />}
-      </div>
-    </>
+    <Layout>
+      <Routes>
+        <Route
+          path="/"
+          element={!authenticated ? <NotAuthenticated /> : <Dashboard />}
+        />
+        <Route
+          path="/invitations"
+          element={authenticated ? <InvitationsPage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/game/:gameId"
+          element={authenticated ? <GamePage /> : <Navigate to="/" />}
+        />
+      </Routes>
+    </Layout>
   )
 }
 
 function NotAuthenticated() {
   const { login } = usePrivy()
 
-  return <LoginButton onClick={login} />
-}
-
-function Authenticated() {
-  const { logout } = usePrivy()
-  const ethosWallet = useEthosWallet()
-  const { ethosUser, loading } = useEthosUser(ethosWallet)
-
   return (
     <>
-      {loading && <LoadingMessage message='Loading Ethos profile...' />}
+      <TopLinks />
+      <div className='container'>
+        <EthosLogo size={160} />
 
-      {ethosUser && <EthosProfileCard user={ethosUser} />}
+        <header className='app-header'>
+          <h1>Ethos Chess</h1>
+          <p>A fully functional on-chain chess application on the Ethos blockchain.</p>
+        </header>
 
-      {!ethosUser && !loading && ethosWallet && (
-        <LoadingMessage message='No Ethos profile found for this wallet' />
-      )}
-
-      <WalletAddress address={ethosWallet} />
-
-      <LogoutButton onClick={logout} />
+        <LoginButton onClick={login} />
+      </div>
     </>
   )
 }
