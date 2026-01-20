@@ -123,6 +123,15 @@ app.post('/api/games/:id/draw', (req, res) => {
   res.json({ status: 'draw' });
 });
 
+// Timeout
+app.post('/api/games/:id/timeout', (req, res) => {
+  const { id } = req.params;
+  const { winner } = req.body;
+  db.prepare('UPDATE games SET status = "timeout", winner = ? WHERE id = ?').run(winner, id);
+  io.to(id).emit('gameOver', { status: 'timeout', winner });
+  res.json({ status: 'timeout', winner });
+});
+
 // Socket.io for real-time moves
 io.on('connection', (socket) => {
   socket.on('joinGame', (gameId) => {

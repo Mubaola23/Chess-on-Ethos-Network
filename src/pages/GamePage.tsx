@@ -29,6 +29,47 @@ export function GamePage() {
   const [whiteTime, setWhiteTime] = useState(600)
   const [blackTime, setBlackTime] = useState(600)
 
+  const [capturedPieces, setCapturedPieces] = useState<{ w: string[], b: string[] }>({ w: [], b: [] })
+  const [materialAdvantage, setMaterialAdvantage] = useState(0)
+  const [viewIndex, setViewIndex] = useState(-1) // -1 means current position
+
+  const calculateCapturedPieces = useCallback((currentFen: string) => {
+    const pieces = currentFen.split(' ')[0].replace(/\//g, '').replace(/\d/g, '')
+
+    let wCaptured: string[] = []
+    let bCaptured: string[] = []
+
+    const pieceValues: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 }
+    let advantage = 0
+
+    const currentCounts: Record<string, number> = {}
+    for (const p of pieces) {
+      currentCounts[p] = (currentCounts[p] || 0) + 1
+    }
+
+    const initialCounts: Record<string, number> = {
+      p: 8, n: 2, b: 2, r: 2, q: 1, k: 1,
+      P: 8, N: 2, B: 2, R: 2, Q: 1, K: 1
+    }
+
+    for (const [p, count] of Object.entries(initialCounts)) {
+      const currentCount = currentCounts[p] || 0
+      const capturedCount = count - currentCount
+      for (let i = 0; i < capturedCount; i++) {
+        if (p === p.toUpperCase()) {
+          wCaptured.push(p.toLowerCase())
+          advantage -= pieceValues[p.toLowerCase()]
+        } else {
+          bCaptured.push(p)
+          advantage += pieceValues[p]
+        }
+      }
+    }
+
+    setCapturedPieces({ w: wCaptured, b: bCaptured })
+    setMaterialAdvantage(advantage)
+  }, [])
+
   const fetchGame = useCallback(async () => {
     try {
       const response = await fetch(`/api/games/${gameId}`)
@@ -36,6 +77,7 @@ export function GamePage() {
       const data = await response.json()
       setGameData(data)
       setGame(new Chess(data.fen))
+      calculateCapturedPieces(data.fen)
 
       const settings = JSON.parse(data.timeControl || '{}')
       if (settings.initial) {
@@ -60,6 +102,8 @@ export function GamePage() {
 
     newSocket.on('moveMade', (data: { move: any, fen: string }) => {
       setGame(new Chess(data.fen))
+      calculateCapturedPieces(data.fen)
+      setViewIndex(-1)
     })
 
     newSocket.on('gameOver', (data: { status: string, winner: string | null }) => {
@@ -90,11 +134,15 @@ export function GamePage() {
   }, [gameData, game])
 
   useEffect(() => {
-    if (whiteTime === 0 || blackTime === 0) {
-      // In a real app, the server should detect this and end the game
-      toast.error(`Time out! ${whiteTime === 0 ? 'Black' : 'White'} wins.`)
+    if ((whiteTime === 0 || blackTime === 0) && gameData?.status === 'active') {
+      const winner = whiteTime === 0 ? gameData.black : gameData.white
+      fetch(`/api/games/${gameId}/timeout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ winner })
+      }).catch(err => console.error('Failed to report timeout:', err))
     }
-  }, [whiteTime, blackTime])
+  }, [whiteTime, blackTime, gameData, gameId])
 
   function makeAMove(move: any) {
     try {
@@ -103,6 +151,7 @@ export function GamePage() {
 
       if (result) {
         setGame(gameCopy)
+        calculateCapturedPieces(gameCopy.fen())
         socket?.emit('move', {
           gameId,
           move: result,
@@ -168,6 +217,10 @@ export function GamePage() {
   const turn = game.turn() === 'w' ? 'White' : 'Black'
   const isMyTurn = (game.turn() === 'w' && isWhite) || (game.turn() === 'b' && !isWhite)
 
+  const pieceSymbols: Record<string, string> = {
+    p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚'
+  }
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -184,7 +237,16 @@ export function GamePage() {
             </div>
             <div>
               <p className="font-bold text-sm">{opponentAddress.slice(0, 12)}...</p>
-              <p className="text-xs text-gray-500">Opponent</p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <div className="flex text-lg leading-none text-gray-400">
+                  {(isWhite ? capturedPieces.w : capturedPieces.b).map((p, i) => (
+                    <span key={i} title={p}>{pieceSymbols[p]}</span>
+                  ))}
+                </div>
+                {((isWhite && materialAdvantage < 0) || (!isWhite && materialAdvantage > 0)) && (
+                  <span className="text-xs font-bold text-gray-500">+{Math.abs(materialAdvantage)}</span>
+                )}
+              </div>
             </div>
           </div>
           <div className={`px-4 py-2 rounded font-mono text-xl ${(!isWhite && game.turn() === 'b') || (isWhite && game.turn() === 'w') ? 'bg-orange-600' : 'bg-gray-800'}`}>
@@ -194,11 +256,12 @@ export function GamePage() {
 
         <div className="aspect-square w-full max-w-[600px] mx-auto shadow-2xl">
           <Chessboard
-            position={game.fen()}
+            position={viewIndex === -1 ? game.fen() : game.history({ verbose: true })[viewIndex].after}
             onPieceDrop={onDrop}
             boardOrientation={boardOrientation}
             customDarkSquareStyle={{ backgroundColor: '#B58863' }}
             customLightSquareStyle={{ backgroundColor: '#F0D9B5' }}
+            areArrowsAllowed={true}
           />
         </div>
 
@@ -209,7 +272,16 @@ export function GamePage() {
             </div>
             <div>
               <p className="font-bold text-sm">You ({isWhite ? 'White' : 'Black'})</p>
-              <p className="text-xs text-gray-500">{ethosWallet?.slice(0, 12)}...</p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <div className="flex text-lg leading-none text-gray-400">
+                  {(isWhite ? capturedPieces.b : capturedPieces.w).map((p, i) => (
+                    <span key={i} title={p}>{pieceSymbols[p]}</span>
+                  ))}
+                </div>
+                {((isWhite && materialAdvantage > 0) || (!isWhite && materialAdvantage < 0)) && (
+                  <span className="text-xs font-bold text-gray-500">+{Math.abs(materialAdvantage)}</span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -228,15 +300,38 @@ export function GamePage() {
             <span className="text-xs text-gray-500">{turn}'s turn</span>
           </div>
           <div className="flex-1 overflow-auto p-4">
-             <div className="grid grid-cols-2 gap-2">
-                {game.history().map((move, i) => (
-                  <div key={i} className={`p-1 rounded text-sm ${i % 2 === 0 ? 'bg-gray-800/50' : ''}`}>
-                    <span className="text-gray-500 mr-2">{Math.floor(i/2) + 1}.</span>
-                    {move}
+             <div className="grid grid-cols-[30px_1fr_1fr] gap-x-2 gap-y-1">
+                {Array.from({ length: Math.ceil(game.history().length / 2) }).map((_, i) => (
+                  <div key={i} className="contents">
+                    <div className="text-gray-500 text-sm flex items-center">{i + 1}.</div>
+                    <button
+                      onClick={() => setViewIndex(i * 2)}
+                      className={`p-1 rounded text-sm text-left hover:bg-blue-600/20 transition-colors ${viewIndex === i * 2 ? 'bg-blue-600/40 font-bold' : 'bg-gray-800/30'}`}
+                    >
+                      {game.history()[i * 2]}
+                    </button>
+                    {game.history()[i * 2 + 1] && (
+                      <button
+                        onClick={() => setViewIndex(i * 2 + 1)}
+                        className={`p-1 rounded text-sm text-left hover:bg-blue-600/20 transition-colors ${viewIndex === i * 2 + 1 ? 'bg-blue-600/40 font-bold' : 'bg-gray-800/30'}`}
+                      >
+                        {game.history()[i * 2 + 1]}
+                      </button>
+                    )}
                   </div>
                 ))}
              </div>
           </div>
+          {viewIndex !== -1 && (
+            <div className="p-2 bg-blue-900/20 border-t border-gray-800 flex justify-center">
+              <button
+                onClick={() => setViewIndex(-1)}
+                className="text-xs font-bold text-blue-400 hover:text-white transition-colors"
+              >
+                Back to current move
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
