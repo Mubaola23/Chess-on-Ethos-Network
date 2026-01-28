@@ -1,16 +1,14 @@
-:root {
-  /* Ethos colors */
-  --ethos-primary: #2e7bc3;
-  --ethos-dark: #1f2125;
-  --ethos-dark-lighter: #2a2d32;
-  --ethos-border: #3a3d42;
+@import "tailwindcss";
 
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: dark;
+
+  color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: var(--ethos-dark);
+  background-color: #161512;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -19,76 +17,53 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  background-color: #161512;
 }
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid var(--ethos-border);
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: var(--ethos-dark-lighter);
-  color: #fff;
-  cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
-}
-
-button:hover {
-  border-color: var(--ethos-primary);
-  background-color: #353840;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 2px solid var(--ethos-primary);
-  outline-offset: 2px;
-}
-
-/* Logo */
-.ethos-logo {
-  margin-bottom: 0.5rem;
-}
-
-/* App Header */
-.app-header {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.app-header h1 {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.app-header p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #888;
-  max-width: 400px;
-}
-
-/* Layout */
-.container {
+/* Base styles for the "Not Authenticated" view */
+.landing-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 2rem;
+  gap: 1.5rem;
+  padding: 4rem 2rem;
   align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
 }
+
+.landing-container h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.landing-container p {
+  font-size: 1.25rem;
+  color: #9ca3af;
+  max-width: 600px;
+}
+
+.landing-container button {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.landing-container button:hover {
+  background-color: #1d4ed8;
+}
+
 
 /* Profile Card */
 .profile-card {
@@ -181,37 +156,4 @@ button:focus-visible {
   font-size: 0.8rem;
   border: 1px solid var(--ethos-border);
   color: #aaa;
-}
-
-/* Top Links */
-.top-links {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  z-index: 100;
-}
-
-.top-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
-  color: #888;
-  text-decoration: none;
-  border: 1px solid var(--ethos-border);
-  border-radius: 8px;
-  background: var(--ethos-dark-lighter);
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.top-link:hover {
-  color: #fff;
-  border-color: var(--ethos-primary);
-}
-
-.top-link svg {
-  flex-shrink: 0;
 }
