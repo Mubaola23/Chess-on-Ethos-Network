@@ -63,3 +63,97 @@ body {
 .landing-container button:hover {
   background-color: #1d4ed8;
 }
+
+
+/* Profile Card */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--ethos-dark-lighter);
+  border-radius: 12px;
+  border: 1px solid var(--ethos-border);
+  max-width: 400px;
+  width: 100%;
+  text-align: left;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.profile-name a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.profile-name a:hover {
+  color: var(--ethos-primary);
+}
+
+.profile-username {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+.profile-id,
+.profile-description,
+.profile-score {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.score-level {
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+/* Wallet Address */
+.wallet-address {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 0.5rem;
+}
+
+.wallet-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wallet-label svg {
+  flex-shrink: 0;
+}
+
+.wallet-address code {
+  background: var(--ethos-dark-lighter);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  border: 1px solid var(--ethos-border);
+  color: #aaa;
+}

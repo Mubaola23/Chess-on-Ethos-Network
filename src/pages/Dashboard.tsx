@@ -4,7 +4,9 @@ import { Bot, Play, History, Trophy, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { getGames, createLocalAIGame } from '../utils/storage'
 
-export function Dashboard() {
+import { EthosProfileCard, type EthosUser } from '../components.tsx'
+
+export function Dashboard({ user }: { user: EthosUser }) {
   const ethosWallet = useEthosWallet()
   const navigate = useNavigate()
   const [activeGames, setActiveGames] = useState<any[]>([])
@@ -39,11 +41,13 @@ export function Dashboard() {
   if (!ethosWallet) return <div className="p-8 text-center">Please connect your wallet</div>
 
   return (
+   
     <div className="w-full p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-extrabold mb-2">Welcome!</h1>
-          <p className="text-gray-400 font-mono text-sm">{ethosWallet}</p>
+           <EthosProfileCard user={user}/>
+          {/* <h1 className="text-4xl font-extrabold mb-2">Welcome back </h1>
+          <p className="text-gray-400 font-mono text-sm">{ethosWallet}</p> */}
         </div>
         <button
           onClick={startAIGame}
