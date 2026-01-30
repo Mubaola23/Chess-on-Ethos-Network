@@ -5,6 +5,7 @@ import { Layout } from './components/Layout.tsx'
 import { Dashboard } from './pages/Dashboard.tsx'
 import { GamePage } from './pages/GamePage.tsx'
 import { LandingPage } from './pages/LandingPage.tsx'
+import { ChessTutorialPage } from './pages/ChessTutorialPage.tsx'
 import { useEthosUser, useEthosWallet } from './hooks.ts'
 
 export function App() {
@@ -26,6 +27,10 @@ export function App() {
         <Route
           path="/game/:gameId"
           element={authenticated ? <GamePage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/tutorial"
+          element={<ChessTutorialPage />}
         />
       </Routes>
     </Layout>

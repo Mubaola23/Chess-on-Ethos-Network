@@ -11,7 +11,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#161512] text-white flex flex-col font-sans selection:bg-blue-500/30">
-      {/* <TopLinks /> */}
+      <TopLinks />
 
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center pt-32 pb-20 px-6 text-center gap-8 overflow-hidden">
@@ -24,7 +24,7 @@ export function LandingPage() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent">
-           CredChess - Credibility + Chess
+            Ethos Chess
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
@@ -42,7 +42,7 @@ export function LandingPage() {
       <section className="py-20 px-6 bg-[#161512]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Why CredChess ?</h2>
+            <h2 className="text-3xl font-bold mb-4">Why Ethos Chess?</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
               We combine the classic game of kings with modern web3 identity and powerful game engines.
             </p>
@@ -85,7 +85,7 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-gray-800 text-center text-gray-500 text-sm">
-        <p>© {new Date().getFullYear()} CredChess. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Ethos Chess. All rights reserved.</p>
       </footer>
     </div>
   )
