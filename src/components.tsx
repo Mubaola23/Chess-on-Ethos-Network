@@ -65,22 +65,31 @@ function getScoreColor(score: number): string {
 
 export function EthosLogo({ size = 64 }: { size?: number }) {
   return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      fill='none'
-      viewBox='0 0 512 512'
-      width={size}
-      height={size}
-      className='ethos-logo'
-    >
-      <rect width='512' height='512' fill='#1F2125' rx='100' />
-      <path
-        fill='#C1C0B6'
-        fillRule='evenodd'
-        d='M255.38 255.189a254.98 254.98 0 0 1-1.935 31.411H101v62.2h136.447a251.522 251.522 0 0 1-35.932 62.2H411v-62.2H237.447a250.584 250.584 0 0 0 15.998-62.2H411v-62.2H253.521a250.604 250.604 0 0 0-15.826-62.2H411V100H202.003a251.526 251.526 0 0 1 35.692 62.2H101v62.2h152.521a255 255 0 0 1 1.859 30.789Z'
-        clipRule='evenodd'
-      />
-    </svg>
+  <svg
+  xmlns='http://www.w3.org/2000/svg'
+  fill='none'
+  viewBox='0 0 512 512'
+  width={size}
+  height={size}
+  className='chess-ethos-logo'
+>
+  <rect width='512' height='512' fill='#1F2125' rx='100' />
+  
+  {/* Stylized King piece */}
+  <path
+    fill='#C1C0B6'
+    fillRule='evenodd'
+    d='M256 80l-10 30h20l-10-30zm-15 40h30l5 15h-40l5-15zm-10 25h50l15 40v30h-80v-30l15-40zm-15 80h80l20 70H196l20-70zm-25 80h100v25H191v-25zm-15 35h140v30H176v-30z'
+    clipRule='evenodd'
+  />
+  
+  {/* Ethos credibility bars */}
+  <g opacity='0.8'>
+    <rect x='140' y='390' width='60' height='8' fill='#C1C0B6' rx='4' />
+    <rect x='140' y='405' width='120' height='8' fill='#C1C0B6' rx='4' />
+    <rect x='140' y='420' width='232' height='8' fill='#C1C0B6' rx='4' />
+  </g>
+</svg>
   )
 }
 

@@ -2,7 +2,7 @@ import { usePrivy } from '@privy-io/react-auth'
 import {
   EthosLogo,
   LoginButton,
-  TopLinks,
+
 } from '../components.tsx'
 import { Bot, ShieldCheck, History, Trophy, Cpu, Globe } from 'lucide-react'
 
