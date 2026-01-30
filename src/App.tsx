@@ -1,15 +1,13 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import {
-  EthosLogo,
-  LoadingMessage,
-  LoginButton,
-  TopLinks,
-} from './components.tsx'
+import { LoadingMessage } from './components.tsx'
 import { Layout } from './components/Layout.tsx'
 import { Dashboard } from './pages/Dashboard.tsx'
 import { GamePage } from './pages/GamePage.tsx'
+import { LandingPage } from './pages/LandingPage.tsx'
+import { ChessTutorialPage } from './pages/ChessTutorialPage.tsx'
 import { useEthosUser, useEthosWallet } from './hooks.ts'
+
 export function App() {
   const { ready, authenticated } = usePrivy()
    const ethosWallet = useEthosWallet()
@@ -24,35 +22,17 @@ export function App() {
       <Routes>
         <Route
           path="/"
-          element={!authenticated  || ethosUser==null? <NotAuthenticated /> : <Dashboard user={ethosUser} />}
+          element={!authenticated  || ethosUser==null? <LandingPage /> : <Dashboard user={ethosUser} />}
         />
         <Route
           path="/game/:gameId"
           element={authenticated ? <GamePage /> : <Navigate to="/" />}
         />
+        <Route
+          path="/tutorial"
+          element={<ChessTutorialPage />}
+        />
       </Routes>
     </Layout>
-  )
-}
-
-function NotAuthenticated() {
-  const { login } = usePrivy()
-
-  return (
-    <>
-      <TopLinks />
-      <div className='landing-container'>
-        <EthosLogo size={160} />
-
-        <header className='app-header'>
-          <h1 className="text-5xl font-extrabold mb-4">Ethos Chess</h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-            A fully functional on-chain chess application on the Ethos blockchain.
-          </p>
-        </header>
-
-        <LoginButton onClick={login} />
-      </div>
-    </>
   )
 }

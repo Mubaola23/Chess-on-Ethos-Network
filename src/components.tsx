@@ -1,4 +1,5 @@
 // Ethos User type from API
+import { Link } from 'react-router-dom'
 export interface EthosUser {
   id: number
   profileId: number
@@ -196,6 +197,13 @@ export function LoadingMessage({ message = 'Loading...' }: { message?: string })
 export function TopLinks() {
   return (
     <div className='absolute top-4 right-4 flex items-center gap-3'>
+       <Link
+        to="/tutorial"
+        className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 hover:text-white text-sm font-medium rounded-lg border border-blue-600/30 transition-all"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Tutorial
+      </Link>
       <a
         href='https://developers.ethos.network/'
         target='_blank'
