@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { usePrivy } from '@privy-io/react-auth'
 import { EthosLogo,type EthosUser, LogoutButton } from '../components.tsx'
-import { LayoutDashboard } from 'lucide-react'
+import { LayoutDashboard, LayoutList } from 'lucide-react'
 export function Layout({ children }: { children: React.ReactNode }) {
   const { logout, authenticated } = usePrivy()
   const navigate = useNavigate()
@@ -19,7 +19,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
             <EthosLogo size={40} />
-            <span className="font-bold text-xl tracking-tight">Ethos Chess</span>
+            <span className="font-bold text-xl tracking-tight">CredChess</span>
           </Link>
 
           <div className="flex items-center gap-6 text-gray-400 font-medium">
@@ -27,10 +27,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <LayoutDashboard size={20} />
               Dashboard
             </Link>
-          </div>
+          </div> <Link to="/" className="flex items-center gap-2 hover:text-white transition-colors">
+             Tutorial
+            </Link>
         </div>
 
         <div className="flex items-center gap-4">
+          
           <LogoutButton onClick={handleLogout} />
         </div>
       </nav>
