@@ -25,44 +25,6 @@ body {
   min-height: 100vh;
 }
 
-/* Base styles for the "Not Authenticated" view */
-.landing-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 4rem 2rem;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  text-align: center;
-}
-
-.landing-container h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin: 0;
-}
-
-.landing-container p {
-  font-size: 1.25rem;
-  color: #9ca3af;
-  max-width: 600px;
-}
-
-.landing-container button {
-  background-color: #2563eb;
-  color: white;
-  padding: 0.75rem 2rem;
-  border-radius: 0.5rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.2s;
-}
-
-.landing-container button:hover {
-  background-color: #1d4ed8;
-}
 
 
 /* Profile Card */
