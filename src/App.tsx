@@ -13,7 +13,7 @@ import { useEthosUser, useEthosWallet } from './hooks.ts'
 export function App() {
   const { ready, authenticated } = usePrivy()
    const ethosWallet = useEthosWallet()
-  const { ethosUser, loading } = useEthosUser(ethosWallet)
+  const { ethosUser} = useEthosUser(ethosWallet)
 
   if (!ready) {
     return <LoadingMessage />
