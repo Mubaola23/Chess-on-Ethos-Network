@@ -1,4 +1,4 @@
-# Ethos Chess (Local Edition)
+# CredChess (Local Edition)
 
 A standalone chess application built for the Ethos platform. Play against a computer opponent with all game data stored locally in your browser.
 

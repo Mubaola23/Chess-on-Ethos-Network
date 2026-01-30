@@ -12,7 +12,7 @@ export function ChessTutorialPage() {
           </Link>
           <h1 className="text-4xl font-extrabold flex items-center gap-3">
             <BookOpen className="text-blue-500" size={40} />
-            How to Play Ethos Chess
+            How to Play CredChess
           </h1>
           <p className="text-xl text-gray-400 mt-2">
             Master the game of kings and queens on the blockchain.
@@ -71,7 +71,7 @@ export function ChessTutorialPage() {
               Ethos & Reputation
             </h2>
             <p className="text-gray-300 leading-relaxed mb-4">
-              Ethos Chess isn't just about winning; it's about building your on-chain reputation.
+              CredChess isn't just about winning; it's about building your on-chain reputation.
             </p>
             <ul className="list-disc list-inside space-y-2 text-gray-300">
               <li><strong className="text-white">Identity:</strong> Your Ethos profile is your player card.</li>

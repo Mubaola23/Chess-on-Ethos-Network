@@ -19,7 +19,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
             <EthosLogo size={40} />
-            <span className="font-bold text-xl tracking-tight">Ethos Chess</span>
+            <span className="font-bold text-xl tracking-tight">CredChess</span>
           </Link>
 
           <div className="flex items-center gap-6 text-gray-400 font-medium">
